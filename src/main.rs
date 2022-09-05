@@ -16,7 +16,7 @@ fn main() -> Result<()> {
         &_params.filename,
         _term.size().and_then(|rect| Ok(rect.height)).unwrap_or(100),
     )
-    .wrap_err("Error initializing state")?;
+    .wrap_err("Error initializing app's state")?;
 
     let mut _continue = true;
     while _continue {

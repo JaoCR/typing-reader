@@ -44,17 +44,20 @@ pub fn draw(term: &mut Term, state: &State) -> Result<()> {
     Ok(())
 }
 
+const CONTINUE: Result<bool> = Ok(true);
+const STOP: Result<bool> = Ok(false);
+
 pub fn process_events(term: &Term, state: &mut State) -> Result<bool> {
     state.text_height = term.size().and_then(|rect| Ok(rect.height)).unwrap_or(100);
     match event::read()? {
         Event::Key(e) => match e.code {
             KeyCode::Backspace => state.backspace(),
             KeyCode::Enter => state.line_break(),
-            KeyCode::Char('q') if e.modifiers == KeyModifiers::CONTROL => return Ok(false),
+            KeyCode::Char('q') if e.modifiers == KeyModifiers::CONTROL => return STOP,
             KeyCode::Char(c) => state.type_char(c),
             _ => {}
         },
         _ => {}
     }
-    Ok(true)
+    CONTINUE
 }
