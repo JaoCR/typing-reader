@@ -8,6 +8,7 @@ use tui::{
     widgets::{Block, Borders, Wrap},
 };
 
+/// Draw the TUI.
 pub fn draw(term: &mut Term, state: &State) -> Result<()> {
     let current_text = state.current_text();
     term.draw(|frame| {
@@ -47,6 +48,7 @@ pub fn draw(term: &mut Term, state: &State) -> Result<()> {
 const CONTINUE: Result<bool> = Ok(true);
 const STOP: Result<bool> = Ok(false);
 
+/// Process events and return whether to continue or not.
 pub fn process_events(term: &Term, state: &mut State) -> Result<bool> {
     state.text_height = term.size().and_then(|rect| Ok(rect.height)).unwrap_or(100);
     match event::read()? {
