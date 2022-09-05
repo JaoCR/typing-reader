@@ -1,88 +1,118 @@
-use stable_eyre::eyre::{bail, eyre, Result};
-use std::{
-    io::{BufRead, Lines},
-    str::Chars,
-};
+use std::str::Chars;
 
-pub struct State {
-    pub lines: Vec<String>,
+/// Represents the state of the typing process.
+#[derive(Debug, Clone)]
+pub struct TypingState {
+    /// The lines of text to be typed.
+    lines: Vec<String>,
+
+    /// The index of the current line.
     pub line_idx: usize,
+
+    /// The index of the current character.
     pub char_idx: usize,
+
+    /// A string that collects the last
+    /// wrongly typed characters.
     pub wrongs: String,
 }
 
-impl State {
-    pub fn new<R: BufRead>(lines: &mut Lines<R>, line_idx: usize) -> Result<Self> {
-        let mut lines_vec = vec![];
-        for line in lines.by_ref() {
-            if let Ok(l) = line {
-                lines_vec.push(l.trim_end().to_string());
-            } else {
-                bail!("Error when parsing line")
-            }
-        }
-        Ok(State {
-            // Using Result::from_iter turns the iterator of Results in a
-            // Result that might be a Ok(with an iterator), it also stops
-            // evaluating on the first error. Useful because Lines yields
-            // Results and we need to map it to it's trimmed slices.
-            lines: lines_vec,
+/// Represents some state change
+/// happened after some method call
+/// on TypingState.
+#[derive(Debug, PartialEq)]
+pub enum StateChange {
+    /// Current line was changed.
+    Line,
+
+    /// Current character was changed.
+    Char,
+
+    /// Wrong character was added or removed.
+    Wrong,
+
+    /// No state change happened.
+    None,
+}
+
+impl TypingState {
+    pub fn new(lines: Vec<String>, line_idx: usize) -> Self {
+        TypingState {
+            lines,
             line_idx,
             char_idx: 0,
             wrongs: String::default(),
-        })
-    }
-
-    pub fn type_char(&mut self, c: char) -> Result<()> {
-        let current_line: Vec<char> = self.current_line_chars()?.collect();
-        // the followind matches! checks if the current target character
-        // equals the typed character.
-        if self.wrongs.is_empty() && matches!(current_line.get(self.char_idx), Some(t) if *t == c) {
-            // character typed correctly
-            self.char_idx += 1;
-        } else {
-            // character typed incorrectly
-            self.wrongs.push(c);
         }
-        Ok(())
     }
 
-    pub fn line_break(&mut self) -> Result<()> {
-        if self.wrongs.is_empty() && self.current_line_chars()?.count() <= self.char_idx {
+    pub fn get_lines(&self) -> &[String] {
+        &self.lines
+    }
+
+    pub fn line_count(&self) -> usize {
+        self.lines.len()
+    }
+
+    pub fn type_char(&mut self, new_char: char) -> StateChange {
+        let to_type = self.current_line_chars().skip(self.char_idx).next();
+        if self.wrongs.is_empty() {
+            match to_type {
+                Some(target) if target == new_char => {
+                    // Correct
+                    self.char_idx += 1;
+                    return StateChange::Char;
+                }
+                // End of file
+                None if self.line_idx == self.lines.len() - 1 => return StateChange::None,
+                _ => {}
+            }
+        }
+        // Wrong
+        self.wrongs.push(new_char);
+        return StateChange::Wrong;
+    }
+
+    pub fn line_break(&mut self) -> StateChange {
+        if self.lines.len() <= self.line_idx {
+            // ignore line break at last line
+            return StateChange::None;
+        }
+        if self.wrongs.is_empty() && self.current_line_chars().count() <= self.char_idx {
             // correct line break
             self.char_idx = 0;
             self.line_idx += 1;
-        } else {
-            // wrong line break
-            self.wrongs.push('\n')
+            return StateChange::Line;
         }
-        Ok(())
+        // wrong line break
+        self.wrongs.push('\n');
+        return StateChange::Wrong;
     }
 
-    pub fn backspace(&mut self) -> Result<()> {
-        if self.wrongs.is_empty() {
-            if self.char_idx <= 0 {
-                if self.line_idx > 0 {
-                    // go back a line
-                    self.line_idx -= 1;
-                    self.char_idx = self.current_line_chars()?.count();
-                } // else do nothing
-            } else {
-                // go back a char
-                self.char_idx -= 1;
-            }
-        } else {
-            // erasing wrong stuff
+    pub fn backspace(&mut self) -> StateChange {
+        if !self.wrongs.is_empty() {
+            // erasing previous typos
             self.wrongs.pop();
+            return StateChange::Wrong;
         }
-        Ok(())
+        if self.char_idx > 0 {
+            // go back a char
+            self.char_idx -= 1;
+            return StateChange::Char;
+        }
+        if self.line_idx > 0 {
+            // go back a line and put cursor at the end
+            self.line_idx -= 1;
+            self.char_idx = self.current_line_chars().count();
+            return StateChange::Line;
+        }
+        // nothing to erase
+        return StateChange::None;
     }
 
-    pub fn current_line_chars(&self) -> Result<Chars> {
-        Ok(self
-            .lines
-            .get(self.line_idx)
-            .ok_or(eyre!("No line at this index."))?
-            .chars())
+    pub fn current_line_chars(&self) -> Chars {
+        match self.lines.get(self.line_idx) {
+            Some(line) => line.chars(),
+            None => unreachable!(),
+        }
     }
 }
