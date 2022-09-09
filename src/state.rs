@@ -151,9 +151,9 @@ impl State {
             let mut wrong_lines = self.typing.wrongs.split('\n');
             // take first line
             let first = Spans::from(vec![
-                Span::raw(before),
+                Span::styled(before, sty_dim),
                 Span::styled(wrong_lines.next().unwrap(), sty_wrong),
-                Span::styled(ending.to_owned(), sty_dim_wrong),
+                Span::styled(ending.to_owned(), sty_wrong),
             ]);
             // take last line
             let last = Spans::from(vec![
@@ -167,7 +167,7 @@ impl State {
             lines.extend(wrong_lines.map(|line| {
                 Spans::from(vec![
                     Span::styled(line, sty_wrong),
-                    Span::styled(ending.to_owned(), sty_dim_wrong),
+                    Span::styled(ending.to_owned(), sty_wrong),
                 ])
             }));
             lines.push(last);

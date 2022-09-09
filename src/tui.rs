@@ -36,9 +36,14 @@ pub fn draw(term: &mut Term, state: &State) -> Result<()> {
         frame.render_widget(par, layout[0]);
 
         let footer = tui::widgets::Paragraph::new(format!(
-            "Line {}/{}",
+            "Line {}/{} | CPS {}",
             state.typing.line_idx + 1,
-            state.typing.line_count()
+            state.typing.line_count(),
+            state
+                .typing
+                .moving_avg_cps()
+                .and_then(|cps| { Some(format!("{:.2}", cps)) })
+                .unwrap_or_else(|| "N/A".to_string()),
         ));
         frame.render_widget(footer, layout[1]);
     })?;
