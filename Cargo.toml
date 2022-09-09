@@ -1,7 +1,18 @@
 [package]
 name = "typing-reader"
 version = "0.1.0"
+authors = ["João Carlos Rodrigues Júnior"]
 edition = "2021"
+description = "A file reader, and a typing trainer."
+# TODO: documentation
+readme = "README.md"
+# TODO: homepage
+repository = "https://github.com/JaoCR/typing-reader/blob/master/README.md"
+license = "MIT or Apache License 2.0"
+keywords = ["typing", "reader", "trainer"]
+category = "Utility"
+
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
