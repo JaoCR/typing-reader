@@ -10,11 +10,14 @@ readme = "README.md"
 repository = "https://github.com/JaoCR/typing-reader/blob/master/README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["typing", "reader", "trainer"]
-category = "Utility"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
 
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 clap = { version = "3.2.17", features = ["derive"] }

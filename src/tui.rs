@@ -36,7 +36,7 @@ pub fn draw(term: &mut Term, state: &State) -> Result<()> {
         frame.render_widget(par, layout[0]);
 
         let footer = tui::widgets::Paragraph::new(format!(
-            "Line {}/{} | CPS {}",
+            "Line {}/{} | CPS {} | Ctrl+q to leave",
             state.typing.line_idx + 1,
             state.typing.line_count(),
             state

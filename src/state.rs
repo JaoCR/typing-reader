@@ -142,7 +142,6 @@ impl State {
         let sty = Style::default();
         let sty_dim = sty.add_modifier(Modifier::DIM);
         let sty_wrong = sty.bg(Color::Red);
-        let sty_dim_wrong = sty_wrong.add_modifier(Modifier::DIM);
         let sty_cursor = sty.bg(Color::DarkGray);
 
         let (before, cursor, after, ending) = self.split_current_line();

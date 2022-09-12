@@ -58,12 +58,12 @@ impl CPSQueue {
         }
     }
 
-    fn resize(&mut self, new_size: usize) {
-        self.max_size = new_size;
-        while self.inner_deque.len() > self.max_size {
-            self.inner_deque.pop_front();
-        }
-    }
+    //fn resize(&mut self, new_size: usize) {
+    //    self.max_size = new_size;
+    //    while self.inner_deque.len() > self.max_size {
+    //        self.inner_deque.pop_front();
+    //    }
+    //}
 }
 
 /// Represents some state change
