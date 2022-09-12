@@ -1,6 +1,6 @@
 [package]
 name = "typing-reader"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["João Carlos Rodrigues Júnior"]
 edition = "2021"
 description = "A file reader, and a typing trainer."
